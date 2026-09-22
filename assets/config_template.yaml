@@ -1,0 +1,130 @@
+# ============================================================
+# 資安漏洞情報自動化系統 - 設定檔範本
+# 複製此檔案為 config.yaml 並填入實際值
+# ============================================================
+
+# ── OneDrive / Microsoft Graph API ──────────────────────────
+onedrive:
+  tenant_id: "YOUR_AZURE_TENANT_ID"
+  client_id: "YOUR_APP_CLIENT_ID"
+  client_secret: "YOUR_APP_CLIENT_SECRET"
+  # OneDrive 儲存路徑（相對於 Drive 根目錄）
+  drive_path: "/VulnIntel"
+  # 漏洞 JSON 主檔名
+  vuln_filename: "vulnerabilities.json"
+  # 產品比對 Excel 路徑（OneDrive 上）
+  products_file: "/VulnIntel/products.xlsx"
+
+# ── SMTP 郵件設定 ────────────────────────────────────────────
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  use_tls: true
+  user: "your-email@gmail.com"
+  password: "YOUR_APP_PASSWORD"
+  sender_name: "資安漏洞情報系統"
+  recipients:
+    - "security-team@company.com"
+    - "ciso@company.com"
+  # 郵件主旨前綴
+  subject_prefix: "[資安告警]"
+  # 寄送門檻（CRITICAL / HIGH / MEDIUM / LOW）
+  severity_threshold: "MEDIUM"
+
+# ── 資料來源設定 ─────────────────────────────────────────────
+sources:
+  nvd:
+    enabled: true
+    api_key: "YOUR_NVD_API_KEY"       # 可留空，無 Key 仍可運作
+    lookback_days: 7                   # 往前追溯天數
+    max_results: 200
+
+  github:
+    enabled: true
+    token: "YOUR_GITHUB_TOKEN"         # 提高 API 配額用
+    # 監控的 GitHub 組織/Repo 關鍵字
+    search_keywords:
+      - "CVE"
+      - "vulnerability"
+      - "security advisory"
+    lookback_days: 3
+
+  msrc:
+    enabled: true
+    # 微軟安全公告 API 無需金鑰
+    lookback_months: 1                 # 往前追溯月數
+
+  zdi:
+    enabled: true
+    # Zero Day Initiative RSS feed（公開）
+    feed_url: "https://www.zerodayinitiative.com/rss/published/"
+    max_items: 50
+
+  ithome:
+    enabled: true
+    feed_url: "https://www.ithome.com.tw/rss"
+    keywords:
+      - "漏洞"
+      - "CVE"
+      - "資安"
+      - "攻擊"
+    max_items: 30
+
+  fisac:
+    enabled: true
+    # 金融資安資訊分享與分析中心
+    base_url: "https://www.fisac.tw"
+    max_items: 30
+
+  twcert:
+    enabled: true
+    # 台灣電腦網路危機處理暨協調中心
+    base_url: "https://www.twcert.org.tw"
+    feed_url: "https://www.twcert.org.tw/tw/cp-132-1.html"
+    max_items: 30
+
+# ── CISA KEV 設定 ────────────────────────────────────────────
+kev:
+  enabled: true
+  cache_hours: 24                      # KEV 清單本地快取有效時數
+  catalog_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+
+# ── PoC 偵測設定 ─────────────────────────────────────────────
+poc:
+  enabled: true
+  github_token: "YOUR_GITHUB_TOKEN"   # 與 sources.github.token 共用
+  check_exploitdb: true
+  check_nuclei: true
+  check_github: true
+
+# ── 翻譯設定 ─────────────────────────────────────────────────
+translation:
+  # 翻譯服務：google / deepl / openai / none
+  service: "google"
+  target_language: "zh-TW"
+  # DeepL 設定（service=deepl 時需填）
+  deepl_api_key: "YOUR_DEEPL_API_KEY"
+  # OpenAI 設定（service=openai 時需填）
+  openai_api_key: "YOUR_OPENAI_API_KEY"
+  openai_model: "gpt-4o-mini"
+
+# ── 網頁伺服器設定 ────────────────────────────────────────────
+web:
+  host: "0.0.0.0"
+  port: 8080
+  # 資料來源：local（讀本地 JSON）/ onedrive（從 OneDrive 拉取）
+  data_source: "local"
+  local_json_path: "./data/vulnerabilities.json"
+  # 網頁每隔幾分鐘自動重新整理資料
+  auto_refresh_minutes: 30
+
+# ── 排程設定 ─────────────────────────────────────────────────
+schedule:
+  # 定時執行間隔（分鐘）
+  interval_minutes: 60
+
+# ── 本地資料存放 ─────────────────────────────────────────────
+storage:
+  data_dir: "./data"
+  log_dir: "./logs"
+  log_level: "INFO"                    # DEBUG / INFO / WARNING / ERROR
